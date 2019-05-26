@@ -79,7 +79,19 @@ app.get("/version", async (req, res) => {
 });
 
 app.get("/get/:target", (req, res) => {
-  res.sendFile(req.params.target, { root: baseDir });
+  // Prevent injection attack by only allowing images to be
+  // served with the proper mime type. Other documents
+  // (e.g. HTML) will be served as octet-stream to prevent
+  // JavaScript from running providing a channel for
+  // script injection attacks.
+  // (Images are allowed so that they can be displayed by
+  // browsers as a part of "preview" functionality.)
+  const mimeType = mimeTypes.lookup(req.params.target);
+  var headers = {};
+  if (!mimeType.startsWith("image/")) {
+    headers["Content-Type"] = "application/octet-stream";
+  }
+  res.sendFile(req.params.target, { root: baseDir, headers });
 });
 
 app.post("/upload", (req, res) => {
@@ -119,13 +131,14 @@ app.post("/fetch", jsonParser, (req, res) => {
         throw Error(err);
       });
   } else {
-    // Only allow Content-Type header
+    // Serve everything as application/octet-stream to prevent
+    // script injection attack from HTML payload.
     remoteReq.pipefilter = function(response, dest) {
       for (const h in response.headers) {
-        if (h.toLowerCase() != "content-type") {
-          dest.removeHeader(h);
-        }
+        dest.removeHeader(h);
       }
+
+      dest.setHeader("Content-Type", "application/octet-stream");
     };
 
     // Stream to browser
