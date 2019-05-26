@@ -1,0 +1,140 @@
+swagger: "2.0"
+info:
+  description: "A REST API for Calibre's ebook-convert utility."
+  version: "1.0.0"
+  title: "ebook-convert API"
+paths:
+  /version:
+    get:
+      summary: "Get version information"
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "OK"
+          schema:
+            type: "object"
+            properties:
+              calibre:
+                type: "string"
+                description: "Output from ebook-convert --version"
+                example: "ebook-convert (calibre 2.75.1)"
+  /get/{filename}:
+    get:
+      summary: "Download specified file"
+      produces:
+        - "*/*"
+      parameters:
+        - in: path
+          name: filename
+          type: string
+          required: true
+          description: File to download
+      responses:
+        200:
+          description: "OK"
+  /upload:
+    post:
+      summary: "Upload file to temporary store"
+      consumes:
+        - "text/plain"
+        - "text/html"
+        - "application/epub+zip"
+        - "*/*"
+      produces:
+        - "application/json"
+      parameters:
+        - in: body
+          name: document
+          required: true
+          schema:
+            type: string
+            example: "Example document"
+      responses:
+        200:
+          description: "OK"
+          schema:
+            $ref: "#/definitions/SaveResponse"
+      security:
+        - api_key: []
+  /fetch:
+    post:
+      summary: "Fetch file from remote server to temporary store"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: body
+          name: request
+          schema:
+            type: "object"
+            properties:
+              url:
+                type: "string"
+                description: "URL to fetch"
+                example: "http://example.com"
+              headers:
+                type: "object"
+                description: "HTTP Headers to send"
+              save:
+                type: "boolean"
+                description: "Whether to save the output or return it in the response"
+                default: false
+      responses:
+        200:
+          description: "OK"
+          schema:
+            $ref: "#/definitions/SaveResponse"
+      security:
+        - api_key: []
+  /convert:
+    post:
+      summary: "Trigger conversion of document"
+      consumes:
+        - "application/json"
+      produces:
+        - "application/json"
+      parameters:
+        - in: body
+          name: request
+          schema:
+            type: "object"
+            properties:
+              source:
+                type: "string"
+                description: "Filename of conversion to input"
+                example: "1168baaa-c75e-436e-934c-1888e92a49d9.txt"
+              format:
+                type: "string"
+                description: "Target format (e.g. azw3 or epub)"
+                example: "azw3"
+      responses:
+        200:
+          description: "OK"
+          schema:
+            type: "object"
+            properties:
+              href:
+                type: "string"
+                description: "Filename of conversion output"
+                example: "ff4002db-a078-41a2-acdd-f5c8929c9a29.azw3"
+              output:
+                type: "string"
+                description: "Output from ebook-convert utility"
+                example: ""
+      security:
+        - api_key: []
+securityDefinitions:
+  api_key:
+    type: "apiKey"
+    name: "x-api-key"
+    in: "header"
+definitions:
+  SaveResponse:
+    type: "object"
+    properties:
+      href:
+        type: "string"
+        description: "Filename of saved object"
+        example: "1168baaa-c75e-436e-934c-1888e92a49d9.txt"

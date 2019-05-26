@@ -8,6 +8,8 @@ const spawn = require("child_process").spawn;
 const uuidv4 = require("uuid/v4");
 const mimeTypes = require("mime-types");
 const request = require("request");
+const swaggerUi = require("swagger-ui-express");
+const YAML = require("yamljs");
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -23,6 +25,11 @@ if (!fs.existsSync(baseDir)) {
 }
 
 app.use(cors());
+app.use(
+  "/api-docs",
+  swaggerUi.serve,
+  swaggerUi.setup(YAML.load("./swagger.yaml"))
+);
 
 const jsonParser = bodyParser.json();
 
