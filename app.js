@@ -10,6 +10,7 @@ const mimeTypes = require("mime-types");
 const request = require("request");
 const swaggerUi = require("swagger-ui-express");
 const YAML = require("yamljs");
+const nodemailer = require("nodemailer");
 
 const app = express();
 const port = process.env.PORT || 5000;
@@ -41,6 +42,25 @@ app.use(function(req, res, next) {
     res.status(403).send("Missing or incorrect X-Api-Key header.");
   }
 });
+
+// Setup email
+var emailTransporter;
+if (process.env.SMTP_HOST) {
+  emailTransporter = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT,
+    secure: process.env.SMTP_SECURE,
+    auth: {
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS
+    }
+  });
+} else {
+  emailTransporter = null;
+  console.log(
+    "WARNING: Please set SMTP_HOST, SMTP_PORT, SMTP_SECURE, SMTP_FROM, SMTP_USER and SMTP_PASS for email functionalities"
+  );
+}
 
 function saveToFile(contentType, inputStream) {
   const extension = mimeTypes.extension(contentType) || "bin";
@@ -145,6 +165,36 @@ app.post("/convert", jsonParser, (req, res) => {
       output
     });
   });
+});
+
+app.post("/email", jsonParser, (req, res) => {
+  if (emailTransporter === null) {
+    throw Error("SMTP is not enabled");
+  }
+
+  if (!req.body.to) {
+    throw Error("Recipient must be specified");
+  }
+
+  const toAddress = req.body.to;
+  const subject = req.body.subject || "convert";
+  const file = req.body.source;
+
+  emailTransporter
+    .sendMail({
+      from: process.env.SMTP_FROM,
+      to: toAddress,
+      subject,
+      attachments: [
+        {
+          path: baseDir + file
+        }
+      ]
+    })
+    .then(() => {
+      res.sendStatus(204);
+    })
+    .catch(err => res.status(500).send(err));
 });
 
 app.listen(port, () => console.log(`Listening on port ${port}!`));

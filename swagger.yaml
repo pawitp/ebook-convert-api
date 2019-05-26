@@ -125,6 +125,34 @@ paths:
                 example: ""
       security:
         - api_key: []
+  /email:
+    post:
+      summary: "Send document to email address"
+      consumes:
+        - "application/json"
+      parameters:
+        - in: body
+          name: request
+          schema:
+            type: "object"
+            properties:
+              source:
+                type: "string"
+                description: "Filename of document to send"
+                example: "1168baaa-c75e-436e-934c-1888e92a49d9.txt"
+              to:
+                type: "string"
+                description: "Email address of recipient"
+                example: "john@example.com"
+              subject:
+                type: "string"
+                description: "Subject for email"
+                example: "convert"
+      responses:
+        204:
+          description: "OK"
+      security:
+        - api_key: []
 securityDefinitions:
   api_key:
     type: "apiKey"
