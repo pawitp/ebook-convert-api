@@ -22,7 +22,7 @@ For Heroku deployment, the calibre buildpack can be used to install calibre.
 
 ## Usage
 
-The swagger documentation can be viewed by running the application and opening http://localhost:5000/api-docs.
+The swagger documentation can be viewed by running the application and opening http://localhost:5000/api-docs. Alternatively, you can view the documentation using the online Swagger Editor: https://editor.swagger.io/?url=https://raw.githubusercontent.com/pawitp/ebook-convert-api/master/swagger.yaml.
 
 Basic usage flow is as follows:
 
