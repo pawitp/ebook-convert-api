@@ -86,7 +86,7 @@ app.get("/get/:target", (req, res) => {
   // script injection attacks.
   // (Images are allowed so that they can be displayed by
   // browsers as a part of "preview" functionality.)
-  const mimeType = mimeTypes.lookup(req.params.target);
+  const mimeType = mimeTypes.lookup(req.params.target) || '';
   var headers = {};
   if (!mimeType.startsWith("image/")) {
     headers["Content-Type"] = "application/octet-stream";
