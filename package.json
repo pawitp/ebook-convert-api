@@ -27,7 +27,7 @@
     "mime-types": "^2.1.24",
     "nodemailer": "^6.6.1",
     "request": "^2.88.0",
-    "swagger-ui-express": "^4.0.4",
+    "swagger-ui-express": "^4.6.0",
     "uuid": "^3.3.2",
     "yamljs": "^0.3.0"
   },
